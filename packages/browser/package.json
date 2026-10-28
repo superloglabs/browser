@@ -1,0 +1,24 @@
+{
+  "name": "@superlog/browser",
+  "version": "0.1.0",
+  "description": "Errors, sessions, traces, and Web Vitals for the browser, sent as OpenTelemetry",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/api-logs": "0.223.0",
+    "@opentelemetry/browser-instrumentation": "0.9.0",
+    "@opentelemetry/browser-sdk": "0.6.0",
+    "@opentelemetry/sdk-logs": "0.223.0",
+    "@opentelemetry/sdk-trace": "2.12.0"
+  }
+}

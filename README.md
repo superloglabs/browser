@@ -1,0 +1,132 @@
+# Superlog browser SDK
+
+Errors, sessions, traces, and Web Vitals for the browser, sent as standard
+OpenTelemetry over OTLP/HTTP. It works with Superlog and with any OTLP
+backend.
+
+- `@superlog/browser`: error capture, breadcrumbs, user and attributes,
+  filtering, sessions, fetch and XMLHttpRequest tracing, navigation, and Web
+  Vitals.
+- `@superlog/react`: an error boundary, React 19 root error handlers, and
+  route patterns from React Router.
+
+It is built on the OpenTelemetry Browser SIG packages
+(`@opentelemetry/browser-sdk` and `@opentelemetry/browser-instrumentation`),
+which provide the providers, exporters, sessions, and instrumentations.
+
+## Install
+
+```sh
+npm install @superlog/browser @superlog/react
+```
+
+## Start it
+
+Call `init` before the application renders.
+
+```ts
+import { init, setUser } from "@superlog/browser";
+
+init({
+  service: "storefront",
+  ingestKey: import.meta.env.VITE_SUPERLOG_INGEST_KEY,
+  release: import.meta.env.VITE_RELEASE,
+  environment: import.meta.env.MODE,
+  // Cross-origin APIs that should continue the trace. Same-origin requests
+  // always do.
+  tracePropagationTargets: ["https://api.example.com"],
+});
+
+setUser({ id: user.id, email: user.email });
+```
+
+To send to another OTLP backend, set `endpoint` and `headers` instead of
+`ingestKey`.
+
+## React
+
+```tsx
+import { ErrorBoundary, instrumentRouter, reactErrorHandler } from "@superlog/react";
+import { createBrowserRouter, RouterProvider } from "react-router";
+
+const router = createBrowserRouter(routes);
+instrumentRouter(router);
+
+createRoot(document.getElementById("root")!, {
+  onCaughtError: reactErrorHandler(),
+  onRecoverableError: reactErrorHandler(),
+}).render(
+  <ErrorBoundary fallback={({ reset }) => <button onClick={reset}>Try again</button>}>
+    <RouterProvider router={router} />
+  </ErrorBoundary>,
+);
+```
+
+## Manual capture
+
+```ts
+import { addBreadcrumb, captureException, captureMessage, setAttributes } from "@superlog/browser";
+
+try {
+  await pay(cart);
+} catch (error) {
+  captureException(error, { attributes: { "payment.provider": "stripe" } });
+}
+
+addBreadcrumb({ category: "checkout", message: "payment started" });
+setAttributes({ "app.plan": "pro" });
+captureMessage("checkout took longer than 5s", "warning");
+```
+
+## What it sends
+
+Each error is an OpenTelemetry log record with `eventName: "exception"` and
+severity ERROR, which is how OpenTelemetry records exceptions as logs.
+
+| Attribute | Value |
+|---|---|
+| `exception.type`, `exception.message`, `exception.stacktrace` | The error. Causes follow the stack as `Caused by:` |
+| `exception.mechanism` | `onerror`, `onunhandledrejection`, `react`, or `manual` |
+| `exception.handled` | Whether the application caught it |
+| `app.breadcrumbs` | JSON array of the last clicks, navigations, console messages, and requests |
+| `url.full` | The page |
+| `url.template` | The route pattern, with `@superlog/react`'s router integration |
+| `react.component_stack` | The component stack, from React |
+| `session.id` | The session, on every log and span |
+| `user.id`, `user.email`, `user.name` | From `setUser`, on every log and span |
+
+The resource has `service.name`, `service.version` (the release),
+`deployment.environment.name`, and the browser's `user_agent.original`,
+`browser.platform`, `browser.brands`, `browser.mobile`, and
+`browser.language`.
+
+Other signals:
+
+- Spans for fetch and XMLHttpRequest calls, with `traceparent` sent to the
+  application's own origin and to `tracePropagationTargets`.
+- Logs for page loads and navigations (`browser.navigation`), page load timing,
+  and Web Vitals (`browser.web_vital`).
+
+## Filtering
+
+These are dropped before sending:
+
+- `Script error.` without details.
+- The ResizeObserver loop notice.
+- Errors whose frames all come from browser extensions or from `denyUrls`.
+- Errors matching `ignoreErrors`.
+- The same error repeated within a second.
+- Errors past `maxErrorsPerMinute` (30).
+
+`beforeSend` can change or drop any error, and `beforeBreadcrumb` any
+breadcrumb.
+
+## Development
+
+```sh
+pnpm install
+pnpm test        # Chromium, Firefox, and WebKit through Playwright
+pnpm typecheck
+pnpm size
+node examples/cross-browser/run.mjs   # the same bug in three browsers, as sent
+```

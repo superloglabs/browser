@@ -1,0 +1,28 @@
+{
+  "name": "@superlog/react",
+  "version": "0.1.0",
+  "description": "React error boundary and router route names for @superlog/browser",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm --filter @superlog/browser build && tsc -p tsconfig.json",
+    "typecheck": "pnpm --filter @superlog/browser build && tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@superlog/browser": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {}
+}
