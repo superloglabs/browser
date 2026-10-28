@@ -146,3 +146,34 @@ describe("@superlog/browser", () => {
     expect(exports.requests).toEqual([]);
   });
 });
+
+describe("debug IDs", () => {
+  afterEach(async () => {
+    await shutdown();
+    vi.unstubAllGlobals();
+    globalThis.__superlogDebugIds = undefined;
+  });
+
+  it("sends the debug ID of each file in the stack", async () => {
+    const exports = captureExports();
+    globalThis.__superlogDebugIds = {
+      "Error\n    at https://app.example.com/assets/index-B9xK3d2a.js:6:4000": "0b9f6b9e-2f4a-4c1e-9d2b-3f8a6c1d7e01",
+      "@https://app.example.com/assets/vendor-Cq7xP1aa.js:1:900": "5c3e1f0a-8b7d-4e6c-a1f2-9d8e7c6b5a40",
+    };
+    init({ endpoint, service: "storefront" });
+    const error = new Error("boom");
+    error.stack = [
+      "Error: boom",
+      "    at bp (https://app.example.com/assets/index-B9xK3d2a.js:6:3277)",
+      "    at c (https://app.example.com/assets/vendor-Cq7xP1aa.js:1:20)",
+      "    at d (https://cdn.example.com/other.js:1:1)",
+    ].join("\n");
+    captureException(error);
+
+    const [sent] = exceptions(await exports.logs());
+    expect(JSON.parse(String(sent?.attributes["app.debug_ids"]))).toEqual({
+      "https://app.example.com/assets/index-B9xK3d2a.js": "0b9f6b9e-2f4a-4c1e-9d2b-3f8a6c1d7e01",
+      "https://app.example.com/assets/vendor-Cq7xP1aa.js": "5c3e1f0a-8b7d-4e6c-a1f2-9d8e7c6b5a40",
+    });
+  });
+});

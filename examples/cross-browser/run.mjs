@@ -1,21 +1,34 @@
 // Throws the same bug in Chromium, Firefox, and WebKit from a minified,
-// content-hashed bundle and prints the exception logs each browser sends.
+// content-hashed bundle tagged with debug IDs, and writes the exception logs
+// each browser sends together with the bundle's source map.
 import { build } from "esbuild";
+import { mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { chromium, firefox, webkit } from "playwright";
+import { injectDebugIds } from "../../packages/sourcemaps/dist/index.js";
 
-const bundle = await build({
+const output = process.argv[2] ?? "cross-browser.json";
+const dist = await mkdtemp(join(tmpdir(), "superlog-cross-browser-"));
+await build({
+  alias: { "@superlog/browser": new URL("../../packages/browser/dist/index.js", import.meta.url).pathname },
   bundle: true,
-  entryPoints: [new URL("./app.js", import.meta.url).pathname],
+  entryNames: "assets/[name]-[hash]",
+  entryPoints: [new URL("./sdk.js", import.meta.url).pathname, new URL("./app.js", import.meta.url).pathname],
   format: "esm",
   minify: true,
   nodePaths: [new URL("../../packages/browser/node_modules", import.meta.url).pathname],
-  alias: { "@superlog/browser": new URL("../../packages/browser/dist/index.js", import.meta.url).pathname },
+  outdir: dist,
   platform: "browser",
+  sourcemap: "linked",
+  sourceRoot: "",
   target: "es2020",
-  write: false,
 });
-const script = bundle.outputFiles[0].text;
-const html = '<!doctype html><button id="pay">Pay</button><script type="module" src="/assets/index-B9xK3d2a.js"></script>';
+const files = await injectDebugIds(dist);
+const tagged = files.find((file) => file.file.startsWith("assets/app-"));
+const sdk = files.find((file) => file.file.startsWith("assets/sdk-"));
+const scripts = Object.fromEntries(await Promise.all(files.map(async (file) => [`/${file.file}`, await readFile(join(dist, file.file), "utf8")])));
+const html = `<!doctype html><button id="pay">Pay</button><script type="module" src="/${sdk.file}"></script><script type="module" src="/${tagged.file}"></script>`;
 
 const records = [];
 for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
@@ -24,7 +37,7 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
   await page.route("https://app.test/**", (route) => {
     const path = new URL(route.request().url()).pathname;
     if (path === "/") return route.fulfill({ body: html, contentType: "text/html" });
-    if (path.startsWith("/assets/")) return route.fulfill({ body: script, contentType: "text/javascript" });
+    if (scripts[path]) return route.fulfill({ body: scripts[path], contentType: "text/javascript" });
     return route.fulfill({ status: 404 });
   });
   await page.route("https://intake.test/**", async (route) => {
@@ -34,15 +47,14 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
     const body = JSON.parse(route.request().postData() ?? "{}");
     for (const rl of body.resourceLogs ?? []) for (const sl of rl.scopeLogs) for (const lr of sl.logRecords) {
       if (lr.eventName !== "exception") continue;
-      const attrs = Object.fromEntries(lr.attributes.map((a) => [a.key, a.value.stringValue ?? a.value.boolValue ?? a.value.intValue]));
-      records.push({ attributes: attrs, authorization: route.request().headers().authorization, browser: name, severityNumber: lr.severityNumber });
+      const attributes = Object.fromEntries(lr.attributes.map((a) => [a.key, a.value.stringValue ?? a.value.boolValue ?? a.value.intValue]));
+      records.push({ attributes, authorization: route.request().headers().authorization, browser: name });
     }
     return route.fulfill({ headers: { "access-control-allow-origin": "*" }, status: 200 });
   });
   await page.goto("https://app.test/");
   await page.click("#pay");
   await page.evaluate(() => window.reportHandled());
-  // Hiding the page flushes what is queued, as a closing tab would.
   await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
     document.dispatchEvent(new Event("visibilitychange"));
@@ -50,4 +62,6 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
   await page.waitForTimeout(1500);
   await browser.close();
 }
-console.log(JSON.stringify(records));
+const map = JSON.parse(await readFile(tagged.mapPath, "utf8"));
+await writeFile(output, JSON.stringify({ debugId: tagged.debugId, file: tagged.file, map, records }, null, 2));
+console.log(`${records.length} exceptions from ${new Set(records.map((r) => r.browser)).size} browsers; debug ID ${tagged.debugId}`);

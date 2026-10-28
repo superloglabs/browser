@@ -45,12 +45,20 @@ OpenTelemetry so customers are not tied to one backend.
 
 ## Not done yet
 
-- Source maps: a build plugin that adds debug IDs and uploads maps, and
-  symbolication on ingest before errors are grouped. Minified stacks group
-  by minified names until then.
 - `@superlog/next` for the Next.js client, server, and edge runtimes.
 - Offline buffering, long animation frames, session replay, and release
   health.
+
+## Source maps
+
+`@superlog/sourcemaps` adds a one-line registration and a `//# debugId=`
+comment after each built file's code, so the map's positions stay valid,
+and adds `debugId` to the map. The registration stores the ID under the
+stack of an error created in the file; the SDK reads the file URL from that
+stack and sends the IDs of the files in each error's stack. The backend
+(responder-oss#436) stores maps by workspace and debug ID, rewrites frames to
+the original source before grouping, and names each frame by the function
+around its original position in the embedded source.
 
 ## Cross-browser grouping
 

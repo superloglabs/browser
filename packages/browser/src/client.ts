@@ -2,6 +2,7 @@ import type { Attributes } from "@opentelemetry/api";
 import { SeverityNumber } from "@opentelemetry/api-logs";
 import type { Logger } from "@opentelemetry/api-logs";
 import type { Breadcrumbs } from "./breadcrumbs.js";
+import { debugIdsFor } from "./debug-ids.js";
 import { type Exception, toException } from "./exception.js";
 import { matches } from "./patterns.js";
 import type { Scope } from "./scope.js";
@@ -78,6 +79,7 @@ export class Client {
         "exception.message": event.message,
         "exception.type": event.type,
         ...(event.stacktrace ? { "exception.stacktrace": event.stacktrace } : {}),
+        ...debugIdAttributes(event.stacktrace),
       },
       // The body repeats the message so backends that group logs by body
       // still tell errors apart.
@@ -126,6 +128,11 @@ export class Client {
     const url = this.options.sanitizeUrl ? this.options.sanitizeUrl(location.href) : location.href;
     return { "url.full": url };
   }
+}
+
+function debugIdAttributes(stacktrace: string | undefined): Attributes {
+  const debugIds = debugIdsFor(stacktrace);
+  return debugIds ? { "app.debug_ids": JSON.stringify(debugIds) } : {};
 }
 
 function framesUrls(stacktrace: string | undefined): string[] {

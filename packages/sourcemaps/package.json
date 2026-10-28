@@ -1,0 +1,23 @@
+{
+  "name": "@superlog/sourcemaps",
+  "version": "0.1.0",
+  "description": "Adds debug IDs to built JavaScript and uploads its source maps to Superlog",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./vite": { "types": "./dist/vite.d.ts", "default": "./dist/vite.js" }
+  },
+  "bin": { "superlog-sourcemaps": "./dist/cli.js" },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "vite": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "vite": { "optional": true }
+  }
+}
