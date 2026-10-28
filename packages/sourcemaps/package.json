@@ -3,13 +3,40 @@
   "version": "0.1.0",
   "description": "Adds debug IDs to built JavaScript and uploads its source maps to Superlog",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/superloglabs/browser.git",
+    "directory": "packages/sourcemaps"
+  },
+  "homepage": "https://github.com/superloglabs/browser#readme",
+  "bugs": {
+    "url": "https://github.com/superloglabs/browser/issues"
+  },
+  "keywords": [
+    "opentelemetry",
+    "otel",
+    "browser",
+    "errors",
+    "rum",
+    "source-maps"
+  ],
   "type": "module",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./vite": { "types": "./dist/vite.d.ts", "default": "./dist/vite.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "default": "./dist/vite.js"
+    }
   },
-  "bin": { "superlog-sourcemaps": "./dist/cli.js" },
-  "files": ["dist"],
+  "bin": {
+    "superlog-sourcemaps": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -18,6 +45,12 @@
     "vite": ">=5"
   },
   "peerDependenciesMeta": {
-    "vite": { "optional": true }
+    "vite": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

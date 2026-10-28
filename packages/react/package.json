@@ -3,6 +3,23 @@
   "version": "0.1.0",
   "description": "React error boundary and router route names for @superlog/browser",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/superloglabs/browser.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/superloglabs/browser#readme",
+  "bugs": {
+    "url": "https://github.com/superloglabs/browser/issues"
+  },
+  "keywords": [
+    "opentelemetry",
+    "otel",
+    "browser",
+    "errors",
+    "rum",
+    "source-maps"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -24,5 +41,9 @@
   "peerDependencies": {
     "react": ">=18"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

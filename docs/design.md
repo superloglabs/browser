@@ -2,8 +2,9 @@
 
 ## Goal
 
-Frontend error tracking on par with Sentry's browser SDK, sent as
-OpenTelemetry so customers are not tied to one backend.
+Complete frontend error tracking — errors with context, breadcrumbs, source
+maps, sessions, and performance — sent as OpenTelemetry so applications are
+not tied to one backend.
 
 ## Layers
 
@@ -73,5 +74,4 @@ it cannot restore frames Safari never recorded.
 ## Size
 
 `pnpm size`: about 39 KB gzipped for `init`, with tracing, Web Vitals, and
-sessions. Sentry's errors-only bundle is about 29 KB and its bundle with
-tracing about 51 KB. An errors-only entry point would cut ours further.
+sessions. An errors-only entry point would cut this further.

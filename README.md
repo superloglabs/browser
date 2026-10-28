@@ -149,6 +149,12 @@ These are dropped before sending:
 `beforeSend` can change or drop any error, and `beforeBreadcrumb` any
 breadcrumb.
 
+## Releasing
+
+Bump `version` in each package, then push a tag such as `v0.1.1`. The Publish
+workflow builds, tests, and publishes all three packages with npm trusted
+publishing.
+
 ## Development
 
 ```sh
