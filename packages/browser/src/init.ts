@@ -29,21 +29,13 @@ import {
 import { Client } from "./client.js";
 import { matches } from "./patterns.js";
 import { Scope, ScopeLogRecordProcessor, ScopeSpanProcessor } from "./scope.js";
+import { setCurrentClient } from "./state.js";
 import type { InitOptions } from "./types.js";
 
 export const DEFAULT_ENDPOINT = "https://intake.superlog.sh";
 const SCOPE_NAME = "@superlog/browser";
 
-interface Started {
-  client: Client;
-  stop: () => Promise<void>;
-}
-
-let started: Started | null = null;
-
-export function currentClient(): Client | null {
-  return started?.client ?? null;
-}
+let started: { client: Client; stop: () => Promise<void> } | null = null;
 
 // Starts error capture, sessions, tracing, and Web Vitals. Call it once, as
 // early as possible, before the application renders.
@@ -119,6 +111,7 @@ export function init(options: InitOptions): Client | null {
     enabled.clicks ? recordClicks(breadcrumbs) : () => {},
     enabled.console ? recordConsole(breadcrumbs) : () => {},
   ];
+  setCurrentClient(client);
   started = {
     client,
     stop: async () => {
@@ -162,5 +155,6 @@ export async function flush(): Promise<void> {
 export async function shutdown(): Promise<void> {
   const current = started;
   started = null;
+  setCurrentClient(null);
   await current?.stop();
 }

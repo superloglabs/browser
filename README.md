@@ -118,6 +118,19 @@ setAttributes({ "app.plan": "pro" });
 captureMessage("checkout took longer than 5s", "warning");
 ```
 
+## Loading it later
+
+`init` and OpenTelemetry can live in a chunk of their own. The capture
+functions in `@superlog/browser/api`, which `@superlog/react` uses, are under
+1 KB and share the client that `init` starts:
+
+```ts
+import { captureException } from "@superlog/browser/api";
+
+const { init } = await import("@superlog/browser");
+init({ service: "storefront", ingestKey });
+```
+
 ## What it sends
 
 Each error is an OpenTelemetry log record with `eventName: "exception"` and

@@ -1,4 +1,4 @@
-import { captureException } from "@superlog/browser";
+import { captureException } from "@superlog/browser/api";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
 export interface FallbackProps {

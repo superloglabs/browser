@@ -1,4 +1,4 @@
-import { setAttributes, addBreadcrumb } from "@superlog/browser";
+import { setAttributes, addBreadcrumb } from "@superlog/browser/api";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { createRoutesFromChildren, matchRoutes, Routes, useLocation } from "react-router";
 import { routeTemplate } from "./router.js";

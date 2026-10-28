@@ -4,7 +4,10 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
-    alias: { "@superlog/browser": fileURLToPath(new URL("./packages/browser/src/index.ts", import.meta.url)) },
+    alias: {
+      "@superlog/browser/api": fileURLToPath(new URL("./packages/browser/src/api.ts", import.meta.url)),
+      "@superlog/browser": fileURLToPath(new URL("./packages/browser/src/index.ts", import.meta.url)),
+    },
   },
   test: {
     projects: [

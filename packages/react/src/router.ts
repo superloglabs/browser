@@ -1,4 +1,4 @@
-import { addBreadcrumb, setAttributes } from "@superlog/browser";
+import { addBreadcrumb, setAttributes } from "@superlog/browser/api";
 
 interface RouteMatch {
   route: { path?: string };

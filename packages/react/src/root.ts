@@ -1,4 +1,4 @@
-import { captureException } from "@superlog/browser";
+import { captureException } from "@superlog/browser/api";
 
 type RootErrorInfo = { componentStack?: string | null };
 
