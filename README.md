@@ -153,7 +153,12 @@ breadcrumb.
 
 Bump `version` in each package, then push a tag such as `v0.1.1`. The Publish
 workflow builds, tests, and publishes all three packages with npm trusted
-publishing.
+publishing, which also records provenance.
+
+npm only allows trusted publishing for packages that exist, so a new package
+is published once by hand (`pnpm build && pnpm -r publish --access public`),
+then its trusted publisher is set on npmjs.com: repository
+`superloglabs/browser`, workflow `publish.yml`.
 
 ## Development
 
