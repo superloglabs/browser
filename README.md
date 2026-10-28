@@ -45,7 +45,8 @@ setUser({ id: user.id, email: user.email });
 
 To send to another OTLP backend, set `endpoint` and `headers` instead of
 `ingestKey`. `propagators` replaces the default W3C trace context and baggage
-headers, for backends that read another header.
+headers, for backends that read another header. `ignoreUrls` keeps requests,
+such as analytics, out of traces and breadcrumbs.
 
 ## React
 

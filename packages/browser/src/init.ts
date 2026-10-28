@@ -70,7 +70,7 @@ export function init(options: InitOptions): Client | null {
   void sessions.start();
 
   const propagateTo = options.tracePropagationTargets ?? [];
-  const ignoreUrls = [new RegExp(`^${endpoint.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`)];
+  const ignoreUrls = [new RegExp(`^${endpoint.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`), ...(options.ignoreUrls ?? [])];
   const sanitizeUrl = options.sanitizeUrl;
   const instrumentations: Instrumentation[] = [];
   if (enabled.navigation) instrumentations.push(new NavigationInstrumentation({ sanitizeUrl, useNavigationApiIfAvailable: true }));

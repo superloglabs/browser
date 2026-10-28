@@ -163,6 +163,19 @@ describe("@superlog/browser", () => {
     expect(seen).toEqual({ [`${location.origin}/api/cart`]: "yes", "https://third-party.example.com/pixel": null });
   });
 
+  it("does not trace or record ignored requests", async () => {
+    init({ endpoint, ignoreUrls: [/^https:\/\/analytics\.example\.com/], service: "storefront" });
+    await fetch(`${location.origin}/api/cart`).catch(() => null);
+    await fetch("https://analytics.example.com/collect").catch(() => null);
+    captureException(new Error("after requests"));
+
+    const urls = (await exports.spans()).map((span) => span.attributes["url.full"]);
+    expect(urls).toContain(`${location.origin}/api/cart`);
+    expect(urls).not.toContain("https://analytics.example.com/collect");
+    const [error] = exceptions(await exports.logs());
+    expect(String(error?.attributes["app.breadcrumbs"])).not.toContain("analytics.example.com");
+  });
+
   it("does nothing when disabled", async () => {
     expect(init({ disabled: true, endpoint, service: "storefront" })).toBeNull();
     captureException(new Error("ignored"));

@@ -52,6 +52,9 @@ export interface InitOptions {
   // do. Other origins never do unless listed, since an unexpected header can
   // fail a CORS preflight.
   tracePropagationTargets?: UrlPattern[];
+  // Requests that are not traced or recorded as breadcrumbs, such as
+  // analytics. The export endpoint is never traced.
+  ignoreUrls?: UrlPattern[];
   // How trace context is written into requests. Default: W3C trace context
   // and baggage. Add a propagator when a backend reads another header.
   propagators?: TextMapPropagator[];
