@@ -1,7 +1,7 @@
 {
   "name": "@superlog/react",
-  "version": "0.1.0",
-  "description": "React error boundary and router route names for @superlog/browser",
+  "version": "0.2.0",
+  "description": "React error boundary, root error handlers, and router route patterns for @superlog/browser",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -26,6 +26,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./router": {
+      "types": "./dist/router-entry.d.ts",
+      "default": "./dist/router-entry.js"
     }
   },
   "files": [
@@ -39,10 +43,18 @@
     "@superlog/browser": "workspace:*"
   },
   "peerDependencies": {
-    "react": ">=18"
+    "react": ">=18",
+    "react-router": ">=6.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "react-router": "^7.18.5"
+  },
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependenciesMeta": {
+    "react-router": {
+      "optional": true
+    }
   }
 }

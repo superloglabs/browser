@@ -1,7 +1,9 @@
 import { captureExports, exceptions } from "../../browser/src/test-support.js";
 import { captureException, init, shutdown } from "@superlog/browser";
 import { render, screen } from "@testing-library/react";
-import { createMemoryRouter } from "react-router";
+import { createMemoryRouter, MemoryRouter, Route, useNavigate } from "react-router";
+import { useEffect } from "react";
+import { SuperlogRoutes } from "./router-entry.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorBoundary, instrumentRouter, reactErrorHandler, routeTemplate } from "./index.js";
 
@@ -59,6 +61,35 @@ describe("@superlog/react", () => {
     await router.navigate("/settings");
     captureException(new Error("settings failed"));
     stop();
+
+    const templates = exceptions(await exports.logs()).map((log) => log.attributes["url.template"]);
+    expect(templates).toEqual(["/orders/:orderId", "/settings"]);
+  });
+
+  it("adds the route pattern from declarative routes", async () => {
+    function GoToSettings() {
+      const navigate = useNavigate();
+      useEffect(() => {
+        captureException(new Error("order failed"));
+        navigate("/settings");
+      }, [navigate]);
+      return null;
+    }
+    function Settings() {
+      useEffect(() => captureException(new Error("settings failed")), []);
+      return <p>Settings</p>;
+    }
+    render(
+      <MemoryRouter initialEntries={["/orders/41"]}>
+        <SuperlogRoutes>
+          <Route path="/" element={null}>
+            <Route path="orders/:orderId" element={<GoToSettings />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </SuperlogRoutes>
+      </MemoryRouter>,
+    );
+    await screen.findByText("Settings").catch(() => null);
 
     const templates = exceptions(await exports.logs()).map((log) => log.attributes["url.template"]);
     expect(templates).toEqual(["/orders/:orderId", "/settings"]);

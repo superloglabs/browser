@@ -80,6 +80,10 @@ importers:
       react:
         specifier: '>=18'
         version: 19.3.1
+    devDependencies:
+      react-router:
+        specifier: ^7.18.5
+        version: 7.18.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
 
   packages/sourcemaps:
     dependencies:

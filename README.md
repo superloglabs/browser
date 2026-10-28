@@ -44,12 +44,14 @@ setUser({ id: user.id, email: user.email });
 ```
 
 To send to another OTLP backend, set `endpoint` and `headers` instead of
-`ingestKey`.
+`ingestKey`. `propagators` replaces the default W3C trace context and baggage
+headers, for backends that read another header.
 
 ## React
 
 ```tsx
-import { ErrorBoundary, instrumentRouter, reactErrorHandler } from "@superlog/react";
+import { ErrorBoundary, reactErrorHandler } from "@superlog/react";
+import { instrumentRouter } from "@superlog/react/router";
 import { createBrowserRouter, RouterProvider } from "react-router";
 
 const router = createBrowserRouter(routes);
@@ -63,6 +65,16 @@ createRoot(document.getElementById("root")!, {
     <RouterProvider router={router} />
   </ErrorBoundary>,
 );
+```
+
+With declarative routes, use `SuperlogRoutes` in place of `<Routes>`:
+
+```tsx
+import { SuperlogRoutes } from "@superlog/react/router";
+
+<SuperlogRoutes>
+  <Route path="/orders/:orderId" element={<Order />} />
+</SuperlogRoutes>
 ```
 
 ## Source maps

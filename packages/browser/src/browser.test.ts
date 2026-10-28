@@ -140,6 +140,29 @@ describe("@superlog/browser", () => {
     expect(log).toMatchObject({ attributes: { "checkout.step": "payment" }, body: "checkout took longer than 5s", severityNumber: 13 });
   });
 
+  it("writes trace context with the configured propagators, to the same origin only", async () => {
+    const seen: Record<string, string | null> = {};
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (!url.startsWith(endpoint)) seen[url] = new Headers(init?.headers).get("x-trace");
+      return new Response("{}", { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    init({
+      endpoint,
+      propagators: [{
+        extract: (context) => context,
+        fields: () => ["x-trace"],
+        inject: (_context, carrier, setter) => setter.set(carrier, "x-trace", "yes"),
+      }],
+      service: "storefront",
+    });
+    await fetch(`${location.origin}/api/cart`);
+    await fetch("https://third-party.example.com/pixel");
+
+    expect(seen).toEqual({ [`${location.origin}/api/cart`]: "yes", "https://third-party.example.com/pixel": null });
+  });
+
   it("does nothing when disabled", async () => {
     expect(init({ disabled: true, endpoint, service: "storefront" })).toBeNull();
     captureException(new Error("ignored"));

@@ -102,6 +102,7 @@ export function init(options: InitOptions): Client | null {
     ...(options.release ? { serviceVersion: options.release } : {}),
     traces: {
       exportConfig: { headers, url: `${endpoint}/v1/traces` },
+      ...(options.propagators ? { propagators: options.propagators } : {}),
       processors: [
         createSessionSpanProcessor(sessions),
         new ScopeSpanProcessor(scope),

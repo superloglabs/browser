@@ -1,4 +1,4 @@
-import type { Attributes } from "@opentelemetry/api";
+import type { Attributes, TextMapPropagator } from "@opentelemetry/api";
 import type { LogRecordProcessor } from "@opentelemetry/sdk-logs";
 import type { SpanProcessor } from "@opentelemetry/sdk-trace";
 
@@ -52,6 +52,9 @@ export interface InitOptions {
   // do. Other origins never do unless listed, since an unexpected header can
   // fail a CORS preflight.
   tracePropagationTargets?: UrlPattern[];
+  // How trace context is written into requests. Default: W3C trace context
+  // and baggage. Add a propagator when a backend reads another header.
+  propagators?: TextMapPropagator[];
   // Share of traces kept, from 0 to 1. Errors are always sent.
   tracesSampleRate?: number;
   // Errors whose message matches are dropped. Strings match anywhere.
