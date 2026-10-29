@@ -1,6 +1,6 @@
 {
   "name": "@superlog/react",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "React error boundary, root error handlers, and router route patterns for @superlog/browser",
   "license": "Apache-2.0",
   "repository": {

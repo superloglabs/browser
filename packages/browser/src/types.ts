@@ -39,6 +39,7 @@ export interface InitOptions {
   // Superlog ingest key. Sent as `Authorization: Bearer <key>`.
   ingestKey?: string;
   // OTLP/HTTP endpoint. `/v1/logs` and `/v1/traces` are added to it.
+  // Defaults to Superlog, `https://superlog.sh/api/ingest`.
   endpoint?: string;
   // Headers for every export request, for any OTLP backend.
   headers?: Record<string, string>;
