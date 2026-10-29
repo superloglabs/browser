@@ -32,7 +32,7 @@ import { Scope, ScopeLogRecordProcessor, ScopeSpanProcessor } from "./scope.js";
 import { setCurrentClient } from "./state.js";
 import type { InitOptions } from "./types.js";
 
-export const DEFAULT_ENDPOINT = "https://intake.superlog.sh";
+export const DEFAULT_ENDPOINT = "https://superlog.sh/api/ingest";
 const SCOPE_NAME = "@superlog/browser";
 
 let started: { client: Client; stop: () => Promise<void> } | null = null;

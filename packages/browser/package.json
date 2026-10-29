@@ -1,6 +1,6 @@
 {
   "name": "@superlog/browser",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Errors, sessions, traces, and Web Vitals for the browser, sent as OpenTelemetry",
   "license": "Apache-2.0",
   "repository": {
